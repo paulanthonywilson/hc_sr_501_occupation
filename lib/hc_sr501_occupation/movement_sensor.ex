@@ -30,9 +30,6 @@ defmodule HcSr501Occupation.MovementSensor do
           last_movement: DateTime.t()
         }
 
-  @doc "Identifies the sensor in the process registry and also when receiving events"
-  @callback name :: atom()
-
   @doc "GPIO Pin to which the sensor is attached"
   @callback pin :: pos_integer()
 

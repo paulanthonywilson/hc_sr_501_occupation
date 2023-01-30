@@ -48,10 +48,7 @@ defmodule HcSr501Occupation.MovementSensorTest do
     assert_receive {SensorUT, :movement_detected, %DateTime{}}
   end
 
-  test "on subscribing a process will not receive a movement detection if none has been detected",
-       %{
-         control_pin: control_pin
-       } do
+  test "on subscribing a process will not receive a movement detection if none has been detected" do
     flush_sensor_message_queue()
     SensorUT.subscribe()
     refute_receive {SensorUT, :movement_detected, _}
