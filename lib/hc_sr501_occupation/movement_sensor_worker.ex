@@ -1,4 +1,11 @@
 defmodule HcSr501Occupation.MovementSensorWorker do
+  @moduledoc """
+  Monitors a pin for indication of movement, or movement stopping, and
+  broadcasts to the `SimplestPubSub` topic.
+
+  Tested through `HcSr501Occupation.MovementSencor` via `HcSr501Occupation.MovementSensorTest`
+  """
+
   use GenServer
   alias Circuits.GPIO
 
@@ -12,9 +19,6 @@ defmodule HcSr501Occupation.MovementSensorWorker do
           last_movement: DateTime.t()
         }
 
-  @doc "GPIO Pin to which the sensor is attached"
-  @callback pin :: pos_integer()
-
   def start_link({topic, pin, name}) do
     GenServer.start_link(__MODULE__, {topic, pin}, name: name)
   end
@@ -24,6 +28,8 @@ defmodule HcSr501Occupation.MovementSensorWorker do
     {:ok, pin_ref} = GPIO.open(pin, :input)
     :ok = GPIO.set_pull_mode(pin_ref, :pulldown)
     :ok = GPIO.set_interrupts(pin_ref, :both)
+
+    # Keep hold of the pin_ref to prevent it being garbage collected.
     {:ok, %__MODULE__{topic: topic, pin: pin, pin_ref: pin_ref}}
   end
 
