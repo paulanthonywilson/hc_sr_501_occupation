@@ -84,6 +84,14 @@ defmodule HcSr501Occupation.MovementSensorTest do
     refute_receive {Sensor, :movement_detected, _}
   end
 
+  test "on subscribing a process will receive the last movement detection, not the last movement stopped",
+       %{control_pin: control_pin} do
+    GPIO.write(control_pin, 1)
+    GPIO.write(control_pin, 0)
+    Sensor.subscribe()
+    assert_receive {Sensor, :movement_detected, %DateTime{}}
+  end
+
   describe "occupation status" do
     setup do
       Sensor.subscribe()

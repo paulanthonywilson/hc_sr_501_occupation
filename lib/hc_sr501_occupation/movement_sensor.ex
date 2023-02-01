@@ -1,6 +1,8 @@
 defmodule HcSr501Occupation.MovementSensor do
   @moduledoc """
   Instanance of the movement and occupation sensor.
+
+  See README for usage.
   """
 
   defmacro __using__(_) do
