@@ -34,7 +34,7 @@ defmodule HcSr501Occupation.MixProject do
       description:
         "For HC_SR_501 sensores. Detects movemement and determine small-room occupancy.",
       licenses: ["Apache-2.0"],
-      links: "https://github.com/paulanthonywilson/hc_sr_501_occupation"
+      links: %{"GitHub" => "https://github.com/paulanthonywilson/hc_sr_501_occupation"}
     ]
   end
 
