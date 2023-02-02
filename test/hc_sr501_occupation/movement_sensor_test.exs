@@ -145,6 +145,25 @@ defmodule HcSr501Occupation.MovementSensorTest do
 
       refute_receive {Sensor, :unoccupied, _}
     end
+
+    test "multiple occupation events can occur without incident", %{control_pin: control_pin} do
+      flush_message_queue()
+
+      for _ <- 1..2 do
+        # To occupied
+        GPIO.write(control_pin, 1)
+        assert_receive {Sensor, :occupied, _}
+
+        # Movement stopped but detected again before becoming unoccupied
+        GPIO.write(control_pin, 0)
+        GPIO.write(control_pin, 1)
+        refute_receive {Sensor, :unoccupied, _}
+
+        # Become unoccupied
+        GPIO.write(control_pin, 0)
+        assert_receive {Sensor, :unoccupied, _}
+      end
+    end
   end
 
   defp flush_message_queue do

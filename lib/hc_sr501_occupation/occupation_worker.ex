@@ -41,11 +41,14 @@ defmodule HcSr501Occupation.OccupationWorker do
         {topic, :movement_detected, timestamp},
         %{topic: topic, occupation_timer: occupation_timer} = s
       ) do
-    if occupation_timer do
-      Process.cancel_timer(occupation_timer)
-    end
+    if occupation_timer, do: Process.cancel_timer(occupation_timer)
 
-    {:noreply, maybe_become_occupied(s, timestamp)}
+    new_state =
+      s
+      |> maybe_cancel_occupation_timer()
+      |> maybe_become_occupied(timestamp)
+
+    {:noreply, new_state}
   end
 
   def handle_info(
@@ -71,6 +74,13 @@ defmodule HcSr501Occupation.OccupationWorker do
 
   defp maybe_become_occupied(previous_state, timestamp) do
     publish_occupation_event(%{previous_state | occupation_timestamp: timestamp, occupied?: true})
+  end
+
+  defp maybe_cancel_occupation_timer(%{occupation_timer: nil} = s), do: s
+
+  defp maybe_cancel_occupation_timer(%{occupation_timer: timer} = s) do
+    Process.cancel_timer(timer)
+    %{s | occupation_timer: nil}
   end
 
   defp publish_occupation_event(%{topic: topic} = state) do
