@@ -19,10 +19,10 @@ end
 
 Define the sensor in your project.
 
-For example to use a HC-SR501 sensor with its out attached to pin 17, and which you want to consider its area unoccupied after 3 minutes: 
+An example is below: the HC-SR501 out pin is attached to GPIO pin 17; we deem the area monitored to be unoccupied after 3 minutes of no movement detection.
+
 
 ```elixir
-
 defmodule Movement.Sensor do
   use HcSr501Occupation.MovementSensor
 
@@ -32,13 +32,11 @@ defmodule Movement.Sensor do
   @impl HcSr501Occupation.MovementSensor
   def occupation_timeout, do: :timer.seconds(180)
 end
-
 ```
 
 In your application (or other supervisor) include your module as a child:
 
 ```elixir
-
 defmodule Movement.Application do
   use Application
 
@@ -52,15 +50,14 @@ defmodule Movement.Application do
     Supervisor.start_link(children, opts)
   end
 end
-
 ```
+
+Note that the module's `pin/0` and `occoupation_timeout/0` are read at start; modifying the values after that point will have no impact without going in and killing processes.
 
 A processes can subscribe to receive a message when a movement event has occurred, with the `subscribe/0` function that has been added to your module, eg
 
 ```elixir
-
 MovementSensor.subscribe()
-
 ```
 
 On subscription your process will receive an occupation message with its current state. If movement has been detected since startup, then the last movement detection will also be sent.
