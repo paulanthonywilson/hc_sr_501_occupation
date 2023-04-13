@@ -20,6 +20,7 @@ defmodule HcSr501Occupation.OccupationWorker do
     GenServer.start_link(__MODULE__, {topic, occupation_timeout}, name: name)
   end
 
+  @impl GenServer
   def init({topic, occupation_timeout}) do
     SimplestPubSub.subscribe(topic)
 
@@ -32,17 +33,14 @@ defmodule HcSr501Occupation.OccupationWorker do
      }}
   end
 
+  @impl GenServer
   def handle_call(:subscription, {from, _}, s) do
     send(from, occupation_event(s))
     {:reply, :ok, s}
   end
 
-  def handle_info(
-        {topic, :movement_detected, timestamp},
-        %{topic: topic, occupation_timer: occupation_timer} = s
-      ) do
-    if occupation_timer, do: Process.cancel_timer(occupation_timer)
-
+  @impl GenServer
+  def handle_info({topic, :movement_detected, timestamp}, %{topic: topic} = s) do
     new_state =
       s
       |> maybe_cancel_occupation_timer()

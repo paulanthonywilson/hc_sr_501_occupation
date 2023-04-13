@@ -50,6 +50,31 @@ defmodule HcSr501Occupation.OccupationWorkerTest do
     assert_receive {:occupation_topic, :unoccupied, ^stopped_timestamp}
   end
 
+  test "occupation timeout cancelled when movement detected", %{pid: pid} do
+    SimplestPubSub.publish(
+      :occupation_topic,
+      {:occupation_topic, :movement_detected, DateTime.utc_now()}
+    )
+
+    SimplestPubSub.publish(
+      :occupation_topic,
+      {:occupation_topic, :movement_stopped, DateTime.utc_now()}
+    )
+
+    %{occupation_timer: timer_ref} = :sys.get_state(pid)
+
+    assert is_integer(Process.read_timer(timer_ref))
+
+    SimplestPubSub.publish(
+      :occupation_topic,
+      {:occupation_topic, :movement_detected, DateTime.utc_now()}
+    )
+
+    :sys.get_state(pid)
+
+    refute Process.read_timer(timer_ref)
+  end
+
   test "movement stop when unoccupied is ignored" do
     SimplestPubSub.publish(
       :occupation_topic,
