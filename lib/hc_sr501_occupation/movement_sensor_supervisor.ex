@@ -48,6 +48,15 @@ defmodule HcSr501Occupation.MovementSensorSupervisor do
     SimplestPubSub.subscribe(name)
   end
 
+  @doc """
+  Sets the occupation status for the sensor
+  """
+  def set_occupied(name, occupation?, timestamp) do
+    name
+    |> occupation_monitor_name()
+    |> GenServer.cast({:set_occupied, occupation?, timestamp})
+  end
+
   defp sensor_name(name), do: String.to_atom("#{name}.Sensor")
   defp occupation_monitor_name(name), do: String.to_atom("#{name}.Occupation")
 end

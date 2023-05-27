@@ -40,6 +40,13 @@ defmodule HcSr501Occupation.OccupationWorker do
   end
 
   @impl GenServer
+  def handle_cast({:set_occupied, occupied?, timestamp}, s) do
+    s = %{s | occupied?: occupied?, occupation_timestamp: timestamp}
+    publish_occupation_event(s)
+    {:noreply, s}
+  end
+
+  @impl GenServer
   def handle_info({topic, :movement_detected, timestamp}, %{topic: topic} = s) do
     new_state =
       s

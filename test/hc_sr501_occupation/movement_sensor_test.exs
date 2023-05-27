@@ -99,7 +99,7 @@ defmodule HcSr501Occupation.MovementSensorTest do
       :ok
     end
 
-    test "is initially unnocupied" do
+    test "is initially unoccupied" do
       assert_receive {Sensor, :unoccupied, %DateTime{} = _timestamp}
       assert_receive {SensorWithLongOccupationTimeout, :unoccupied, %DateTime{} = _timestamp}
       refute_receive {Sensor, _}
@@ -163,6 +163,14 @@ defmodule HcSr501Occupation.MovementSensorTest do
         GPIO.write(control_pin, 0)
         assert_receive {Sensor, :unoccupied, _}
       end
+    end
+
+    test "occupation status can be set" do
+      Sensor.set_occupied(true, ~U[2023-11-03 11:12:13Z])
+      assert_receive {Sensor, :occupied, ~U[2023-11-03 11:12:13Z]}
+
+      Sensor.set_occupied(false, ~U[2023-11-04 11:12:13Z])
+      assert_receive {Sensor, :unoccupied, ~U[2023-11-04 11:12:13Z]}
     end
   end
 
