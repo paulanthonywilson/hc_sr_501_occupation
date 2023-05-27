@@ -1,6 +1,8 @@
 defmodule HcSr501Occupation.MovementSensorSupervisor do
-  @moduledoc """
-  Sets up a GenServer monitoring a GPIO pin for movemement detection signals via a HC-SR501 , and broadcasting
+  @moduledoc false
+
+  _doc = """
+  Sets up a GenServer monitoring a GPIO pin for movement detection signals via a HC-SR501 , and broadcasting
   via the common `SimplestPubSub` topic. Also sets up a GenSever that receives the movement detection messages
   and determines whether the physical area monitored has become unoccupied, by the absence of movement over a time period, or
   occupied by noticing movement when unoccupied which also broadcasts on the same channel.
@@ -8,6 +10,7 @@ defmodule HcSr501Occupation.MovementSensorSupervisor do
   See the README for full behaviour and message details.
 
   """
+
   use Supervisor
 
   @doc """

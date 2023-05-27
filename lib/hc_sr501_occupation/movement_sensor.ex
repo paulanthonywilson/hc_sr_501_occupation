@@ -1,8 +1,37 @@
 defmodule HcSr501Occupation.MovementSensor do
   @moduledoc """
-  Instance of the movement and occupation sensor.
+  Creates an instance of the movement and occupation sensor.
 
-  See README for usage.
+  Usage:
+
+  ```
+  defmodule MyApp.MySensor do
+    use HcSr501Occupation.MovementSensor
+
+    @impl HcSr501Occupation.MovementSensor
+    def pin, do: 17
+
+    @impl HcSr501Occupation.MovementSensor
+    def occupation_timeout, do: :timer.seconds(180)
+  end
+  ```
+
+  Add to the supervision tree, eg
+  ```
+  defmodule MyApp.Application do
+    use Application
+
+    def start(_type, _args) do
+      children = [
+        MyApp.MySensor
+      ]
+      opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+      Supervisor.start_link(children, opts)
+    end
+  end
+  ```
+
+  See README for full usage.
   """
 
   defmacro __using__(_) do
@@ -44,6 +73,8 @@ defmodule HcSr501Occupation.MovementSensor do
   @callback occupation_timeout :: pos_integer()
 
   @doc """
+  Automatically implemented by the `__using__` macro.
+
   Sets the occupation status. Provided for setting on reboot if the client has persisted the status
   somewhere. The status will be broadcast to all subscribers
   """

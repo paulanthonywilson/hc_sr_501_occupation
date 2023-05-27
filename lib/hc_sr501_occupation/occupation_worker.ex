@@ -1,5 +1,6 @@
 defmodule HcSr501Occupation.OccupationWorker do
-  @moduledoc """
+  @moduledoc false
+  _doc = """
   Monitors the movement sensor notifications, to determine occupation status of the monitored area deduced from a lack of movement
 
   """

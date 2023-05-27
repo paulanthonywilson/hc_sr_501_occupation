@@ -110,3 +110,7 @@ When we determine that an area is unoccupied then subscribers will receive messa
 ```
 
 The `DateTime` in a message received when starting up will be the startup time. The `DateTime` in a message caused by an occupied area being deemed to have become unoccupied, will be the time at which the last `:unoccupied` message was received.
+
+### Setting the occupation status
+
+Should your project persist the occupation status, you might want to set it on startup with `c:HcSr501Occupation.MovementSensor.set_occupied/2`.

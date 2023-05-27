@@ -1,5 +1,6 @@
 defmodule HcSr501Occupation.MovementSensorWorker do
-  @moduledoc """
+  @moduledoc false
+  _doc = """
   Monitors a pin for indication of movement, or movement stopping, and
   broadcasts to the `SimplestPubSub` topic.
 
