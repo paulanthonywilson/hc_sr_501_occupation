@@ -6,6 +6,7 @@ defmodule HcSr501Occupation.OccupationWorker do
   """
 
   use GenServer
+
   defstruct [:topic, :occupied?, :occupation_timestamp, :occupation_timeout, :occupation_timer]
 
   @type t :: %__MODULE__{
@@ -38,6 +39,14 @@ defmodule HcSr501Occupation.OccupationWorker do
   def handle_call(:subscription, {from, _}, s) do
     send(from, occupation_event(s))
     {:reply, :ok, s}
+  end
+
+  def handle_call(
+        :occupation_status,
+        _,
+        %{occupied?: occupied?, occupation_timestamp: occupation_timestamp} = s
+      ) do
+    {:reply, {occupied?, occupation_timestamp}, s}
   end
 
   @impl GenServer

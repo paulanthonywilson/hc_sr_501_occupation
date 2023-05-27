@@ -53,7 +53,7 @@ defmodule HcSr501Occupation.MovementSensorTest do
     "#{name}.Supervisor" |> String.to_atom() |> Process.whereis()
   end
 
-  describe "subscriber notification" do
+  describe "movement notification" do
     setup do
       Sensor.subscribe()
       :ok
@@ -115,6 +115,8 @@ defmodule HcSr501Occupation.MovementSensorTest do
 
       GPIO.write(long_control_pin, 1)
       assert_receive {SensorWithLongOccupationTimeout, :occupied, %DateTime{} = _timestamp}
+
+      assert {true, _} = SensorWithLongOccupationTimeout.occupation()
     end
 
     test "when occupied does not become unoccupied until the occupation timeout", %{
@@ -125,6 +127,7 @@ defmodule HcSr501Occupation.MovementSensorTest do
       assert_receive {SensorWithLongOccupationTimeout, :occupied, _}
       GPIO.write(control_pin, 0)
       refute_receive {SensorWithLongOccupationTimeout, :unoccupied, _}
+      assert {true, _} = SensorWithLongOccupationTimeout.occupation()
     end
 
     test "becomes unoccupied when the occupation timeout is reached", %{
@@ -135,6 +138,7 @@ defmodule HcSr501Occupation.MovementSensorTest do
       assert_receive {Sensor, :occupied, _}
       GPIO.write(control_pin, 0)
       assert_receive {Sensor, :unoccupied, _}
+      assert {false, _} = Sensor.occupation()
     end
 
     test "detecting movement again prevents an unoccupied message", %{control_pin: control_pin} do
@@ -169,8 +173,12 @@ defmodule HcSr501Occupation.MovementSensorTest do
       Sensor.set_occupied(true, ~U[2023-11-03 11:12:13Z])
       assert_receive {Sensor, :occupied, ~U[2023-11-03 11:12:13Z]}
 
+      assert {true, ~U[2023-11-03 11:12:13Z]} = Sensor.occupation()
+
       Sensor.set_occupied(false, ~U[2023-11-04 11:12:13Z])
       assert_receive {Sensor, :unoccupied, ~U[2023-11-04 11:12:13Z]}
+
+      {false, ~U[2023-11-04 11:12:13Z]} = Sensor.occupation()
     end
   end
 

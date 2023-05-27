@@ -52,6 +52,10 @@ defmodule HcSr501Occupation.MovementSensor do
         HcSr501Occupation.MovementSensorSupervisor.set_occupied(__MODULE__, occupied?, timestamp)
       end
 
+      def occupation do
+        HcSr501Occupation.MovementSensorSupervisor.occupation(__MODULE__)
+      end
+
       def child_spec(opts) do
         %{
           id: __MODULE__,
@@ -73,10 +77,17 @@ defmodule HcSr501Occupation.MovementSensor do
   @callback occupation_timeout :: pos_integer()
 
   @doc """
-  Automatically implemented by the `__using__` macro.
+  Implemented by the `__using__` macro.
 
   Sets the occupation status. Provided for setting on reboot if the client has persisted the status
   somewhere. The status will be broadcast to all subscribers
   """
   @callback set_occupied(occupied? :: boolean(), timestamp :: DateTime.t()) :: :ok
+
+  @doc """
+  Implemented by the `__using__` macro.
+
+  The current occupation status: occupied or not and the last occupation event.
+  """
+  @callback occupation :: {occupied? :: boolean(), timestamp :: DateTime.t()}
 end

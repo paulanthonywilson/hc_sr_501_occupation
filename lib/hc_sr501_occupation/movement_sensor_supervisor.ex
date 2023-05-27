@@ -60,6 +60,15 @@ defmodule HcSr501Occupation.MovementSensorSupervisor do
     |> GenServer.cast({:set_occupied, occupation?, timestamp})
   end
 
+  @doc """
+  The occupation status for the sensor
+  """
+  def occupation(name) do
+    name
+    |> occupation_monitor_name()
+    |> GenServer.call(:occupation_status)
+  end
+
   defp sensor_name(name), do: String.to_atom("#{name}.Sensor")
   defp occupation_monitor_name(name), do: String.to_atom("#{name}.Occupation")
 end
