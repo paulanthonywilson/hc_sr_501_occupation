@@ -1,5 +1,5 @@
 defmodule HcSr501Occupation.OccupationWorkerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   alias HcSr501Occupation.OccupationWorker
 
   # See `HcSr501Occupation.MovementSensorTest` for most beheaviour definitions
@@ -73,6 +73,39 @@ defmodule HcSr501Occupation.OccupationWorkerTest do
     :sys.get_state(pid)
 
     refute Process.read_timer(timer_ref)
+  end
+
+  describe "explicitly setting occupation state with cast" do
+    test "occupation state is set", %{pid: pid} do
+      :sys.replace_state(pid, fn s -> %{s | occupation_timeout: 1_000} end)
+      timestamp = ~U[2023-07-02 01:02:03Z]
+      GenServer.cast(pid, {:set_occupied, true, timestamp})
+
+      assert_receive {:occupation_topic, :occupied, ^timestamp}
+
+      GenServer.cast(pid, {:set_occupied, false, timestamp})
+
+      assert_receive {:occupation_topic, :unoccupied, ^timestamp}
+    end
+
+    test "when occupied, occupation timer is started with the occupation time", %{pid: pid} do
+      timestamp = ~U[2023-07-02 01:02:03Z]
+      GenServer.cast(pid, {:set_occupied, true, timestamp})
+      %{occupation_timer: timer_ref} = :sys.get_state(pid)
+
+      assert is_integer(Process.read_timer(timer_ref))
+      assert_receive {:occupation_topic, :occupied, ^timestamp}
+      assert_receive {:occupation_topic, :unoccupied, ^timestamp}
+    end
+
+    test "when unoccupied, occupation timer is not started", %{pid: pid} do
+      timestamp = ~U[2023-07-02 01:02:03Z]
+      GenServer.cast(pid, {:set_occupied, false, timestamp})
+      assert_receive {:occupation_topic, :unoccupied, ^timestamp}
+      assert %{occupation_timer: nil} = :sys.get_state(pid)
+
+      refute_receive {:occupation_topic, :unoccupied, _}
+    end
   end
 
   test "movement stop when unoccupied is ignored" do

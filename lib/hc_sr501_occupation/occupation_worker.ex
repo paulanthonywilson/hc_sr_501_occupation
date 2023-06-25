@@ -53,7 +53,8 @@ defmodule HcSr501Occupation.OccupationWorker do
   def handle_cast({:set_occupied, occupied?, timestamp}, s) do
     s = %{s | occupied?: occupied?, occupation_timestamp: timestamp}
     publish_occupation_event(s)
-    {:noreply, s}
+    timer_ref = maybe_start_occupation_timer(timestamp, s)
+    {:noreply, %{s | occupation_timer: timer_ref}}
   end
 
   @impl GenServer
@@ -66,11 +67,8 @@ defmodule HcSr501Occupation.OccupationWorker do
     {:noreply, new_state}
   end
 
-  def handle_info(
-        {topic, :movement_stopped, timestamp},
-        %{topic: topic, occupation_timeout: occupation_timeout, occupied?: true} = s
-      ) do
-    timer_ref = Process.send_after(self(), {:occupation_timeout, timestamp}, occupation_timeout)
+  def handle_info({topic, :movement_stopped, timestamp}, %{topic: topic, occupied?: true} = s) do
+    timer_ref = start_occupation_timer(timestamp, s)
 
     {:noreply, %{s | occupation_timer: timer_ref}}
   end
@@ -83,6 +81,13 @@ defmodule HcSr501Occupation.OccupationWorker do
 
   def handle_info(_, s) do
     {:noreply, s}
+  end
+
+  defp maybe_start_occupation_timer(_, %{occupied?: false}), do: nil
+  defp maybe_start_occupation_timer(timestamp, s), do: start_occupation_timer(timestamp, s)
+
+  defp start_occupation_timer(timestamp, %{occupation_timeout: occupation_timeout}) do
+    Process.send_after(self(), {:occupation_timeout, timestamp}, occupation_timeout)
   end
 
   defp maybe_become_occupied(%{occupied?: true} = s, _timestamp), do: s

@@ -12,3 +12,7 @@ Occupation status and time is writeable, so that this can be updated on boot.
 
 Occupation status directly readable.
 
+## v0.1.3
+
+Fix for v0.1.2. Ensure occupation timeout is started when it is explicitly set to occupied with `c:HcSr501Occupation.MovementSensor.set_occupied/2`
+
